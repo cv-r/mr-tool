@@ -1,0 +1,434 @@
+{
+  "name": "mr-tool",
+  "displayName": "MR Tool — 图形化创建合并请求",
+  "description": "在 VS Code 中图形化创建 GitLab Merge Request / GitHub Pull Request，支持分支选择、Assignee 搜索、提交预览与多种 API 回退。",
+  "version": "0.1.0",
+  "publisher": "ruiyun",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "gitlab",
+    "github",
+    "merge request",
+    "pull request",
+    "mr",
+    "pr"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onView:mrTool.myMrs",
+    "onView:mrTool.myReviews",
+    "onView:mrTool.myCreated"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "mrTool.create",
+        "title": "创建合并请求",
+        "category": "MR",
+        "icon": "$(git-pull-request-create)"
+      },
+      {
+        "command": "mrTool.refresh",
+        "title": "刷新 MR 面板",
+        "category": "MR",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mrTool.refreshMyMrs",
+        "title": "拉取分配给我的合并请求",
+        "category": "MR",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mrTool.mergeMr",
+        "title": "合并",
+        "category": "MR",
+        "icon": "$(check)"
+      },
+      {
+        "command": "mrTool.openMr",
+        "title": "在浏览器中打开",
+        "category": "MR",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "mrTool.sendFeishu",
+        "title": "发送飞书通知",
+        "category": "MR",
+        "icon": "$(send)"
+      },
+      {
+        "command": "mrTool.refreshReviews",
+        "title": "拉取待我评审的合并请求",
+        "category": "MR",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mrTool.approveMr",
+        "title": "批准",
+        "category": "MR",
+        "icon": "$(check)"
+      },
+      {
+        "command": "mrTool.markReady",
+        "title": "标记为可评审",
+        "category": "MR",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "mrTool.closeMr",
+        "title": "关闭",
+        "category": "MR",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "mrTool.checkoutMr",
+        "title": "检出到本地",
+        "category": "MR",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "mrTool.copyMrLink",
+        "title": "复制链接",
+        "category": "MR",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "mrTool.refreshCreated",
+        "title": "拉取我发起的合并请求",
+        "category": "MR",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mrTool.editMr",
+        "title": "编辑标题和描述",
+        "category": "MR",
+        "icon": "$(edit)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mrTool",
+          "title": "MR Tool",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "mrTool": [
+        {
+          "id": "mrTool.home",
+          "name": "创建合并请求"
+        },
+        {
+          "id": "mrTool.myMrs",
+          "name": "分配给我的 MR"
+        },
+        {
+          "id": "mrTool.myReviews",
+          "name": "待我评审的 MR"
+        },
+        {
+          "id": "mrTool.myCreated",
+          "name": "我发起的 MR"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "mrTool.home",
+        "contents": "为当前 Git 仓库创建 GitLab Merge Request 或 GitHub Pull Request。\n[创建合并请求](command:mrTool.create)\n\n使用前请先打开一个 Git 仓库。"
+      },
+      {
+        "view": "mrTool.myMrs",
+        "contents": "拉取当前账号在所有项目中被指派给你的合并请求。\n[拉取分配给我的合并请求](command:mrTool.refreshMyMrs)\n\n需要先在当前仓库配置好 glab 或 gh 登录。"
+      },
+      {
+        "view": "mrTool.myReviews",
+        "contents": "拉取等待你评审的合并请求。\n[拉取待我评审的合并请求](command:mrTool.refreshReviews)\n\n需要先在当前仓库配置好 glab 或 gh 登录。"
+      },
+      {
+        "view": "mrTool.myCreated",
+        "contents": "拉取你发起、尚未合并的合并请求。\n[拉取我发起的合并请求](command:mrTool.refreshCreated)\n\n可以编辑标题和描述，也可以关闭（取消）该请求。"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "mrTool.create",
+          "group": "navigation@10",
+          "when": "scmProvider == git"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "mrTool.create",
+          "group": "navigation",
+          "when": "view == mrTool.home"
+        },
+        {
+          "command": "mrTool.refreshMyMrs",
+          "group": "navigation",
+          "when": "view == mrTool.myMrs"
+        },
+        {
+          "command": "mrTool.refreshReviews",
+          "group": "navigation",
+          "when": "view == mrTool.myReviews"
+        },
+        {
+          "command": "mrTool.refreshCreated",
+          "group": "navigation",
+          "when": "view == mrTool.myCreated"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mrTool.mergeMr",
+          "group": "inline@1",
+          "when": "viewItem =~ /^(assignedMr|createdMr)$/"
+        },
+        {
+          "command": "mrTool.approveMr",
+          "group": "inline@1",
+          "when": "view == mrTool.myReviews && viewItem == reviewMr"
+        },
+        {
+          "command": "mrTool.editMr",
+          "group": "inline@2",
+          "when": "viewItem == createdMr"
+        },
+        {
+          "command": "mrTool.openMr",
+          "group": "inline@3",
+          "when": "viewItem =~ /^(assignedMr|reviewMr|createdMr)$/"
+        },
+        {
+          "command": "mrTool.copyMrLink",
+          "group": "inline@4",
+          "when": "viewItem =~ /^(assignedMr|reviewMr|createdMr)$/"
+        },
+        {
+          "command": "mrTool.editMr",
+          "group": "1_actions@1",
+          "when": "viewItem == createdMr"
+        },
+        {
+          "command": "mrTool.markReady",
+          "group": "1_actions@2",
+          "when": "viewItem =~ /^(assignedMr|reviewMr|createdMr)$/"
+        },
+        {
+          "command": "mrTool.checkoutMr",
+          "group": "1_actions@3",
+          "when": "viewItem =~ /^(assignedMr|reviewMr|createdMr)$/"
+        },
+        {
+          "command": "mrTool.closeMr",
+          "group": "1_actions@4",
+          "when": "viewItem =~ /^(assignedMr|reviewMr|createdMr)$/"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mrTool.refresh",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.mergeMr",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.openMr",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.approveMr",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.markReady",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.closeMr",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.checkoutMr",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.copyMrLink",
+          "when": "false"
+        },
+        {
+          "command": "mrTool.editMr",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MR Tool",
+      "properties": {
+        "mrTool.platform": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "gitlab",
+            "github"
+          ],
+          "enumDescriptions": [
+            "根据远端地址和已登录的 CLI 自动判断",
+            "始终按 GitLab 处理（使用 glab / GitLab API）",
+            "始终按 GitHub 处理（使用 gh / GitHub API）"
+          ],
+          "default": "auto",
+          "description": "代码托管平台。自建 GitLab 的域名通常不含 \"gitlab\"，自动判断失败时可手动指定。"
+        },
+        "mrTool.defaultAssignees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "username"
+            ],
+            "properties": {
+              "username": {
+                "type": "string",
+                "description": "GitLab / GitHub 用户名"
+              },
+              "name": {
+                "type": "string",
+                "description": "显示名称"
+              }
+            }
+          },
+          "default": [],
+          "description": "Assignee 候选列表，在面板中置顶显示。格式：[{ \"username\": \"...\", \"name\": \"...\" }]"
+        },
+        "mrTool.defaultReviewers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "username"
+            ],
+            "properties": {
+              "username": {
+                "type": "string",
+                "description": "GitLab / GitHub 用户名"
+              },
+              "name": {
+                "type": "string",
+                "description": "显示名称"
+              }
+            }
+          },
+          "default": [],
+          "description": "Reviewer 候选列表，在创建面板中置顶显示。格式：[{ \"username\": \"...\", \"name\": \"...\" }]"
+        },
+        "mrTool.autoFetch": {
+          "type": "boolean",
+          "default": true,
+          "description": "打开面板时自动执行 git fetch --prune，保证目标分支列表是最新的。"
+        },
+        "mrTool.recentBranchLimit": {
+          "type": "number",
+          "default": 50,
+          "minimum": 5,
+          "maximum": 200,
+          "description": "目标分支候选数量（按最近提交时间排序）。"
+        },
+        "mrTool.feishuWebhook": {
+          "type": "string",
+          "default": "",
+          "description": "飞书群机器人的 Webhook 地址，例如 https://open.feishu.cn/open-apis/bot/v2/hook/xxx。留空则不发送飞书通知。"
+        },
+        "mrTool.feishuPrefix": {
+          "type": "string",
+          "default": "",
+          "description": "飞书消息的全局默认前缀。某个场景没有单独配置前缀时使用它，例如 \"记录：\"。"
+        },
+        "mrTool.feishuCreatePrefix": {
+          "type": "string",
+          "default": "",
+          "description": "创建 MR 成功通知的专用前缀，留空则使用全局前缀。"
+        },
+        "mrTool.feishuMergePrefix": {
+          "type": "string",
+          "default": "",
+          "description": "合并 MR 成功通知的专用前缀，留空则使用全局前缀。"
+        },
+        "mrTool.feishuManualPrefix": {
+          "type": "string",
+          "default": "",
+          "description": "手动「发送飞书通知」的专用前缀，留空则使用全局前缀。"
+        },
+        "mrTool.feishuCreateTemplate": {
+          "type": "string",
+          "default": "【MR 已创建】{project}\n{title}\n{source} → {target}\n{url}",
+          "description": "创建 MR 成功通知的正文模板。支持占位符：{project} 项目路径、{title} 标题、{source} 源分支、{target} 目标分支、{url} MR 链接、{mentions} @ 列表（放在指定位置，不写则追加到末尾）。留空则使用默认模板。"
+        },
+        "mrTool.feishuMergeTemplate": {
+          "type": "string",
+          "default": "【MR 已合并】{project} {number}\n{title}\n{url}",
+          "description": "合并 MR 成功通知的正文模板。支持占位符：{project} 项目路径、{number} 带符号的编号（!123 / #123）、{iid} 原始编号、{title} 标题、{url} MR 链接、{mentions} @ 列表（放在指定位置，不写则追加到末尾）。留空则使用默认模板。"
+        },
+        "mrTool.feishuMentions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "用户 open_id（ou_xxx）；填 all 表示 @所有人"
+              },
+              "name": {
+                "type": "string",
+                "description": "消息中显示的名字，可留空"
+              }
+            }
+          },
+          "default": [],
+          "description": "自动 @ 的用户列表。开启后每条飞书通知都会 @ 这些人；id 填 open_id（ou_xxx），或填 all 表示 @所有人。可用模板里的 {mentions} 控制 @ 的位置。"
+        },
+        "mrTool.feishuNotifyOnCreate": {
+          "type": "boolean",
+          "default": true,
+          "description": "创建 MR 成功后自动发送飞书通知（消息包含 MR 链接）。"
+        },
+        "mrTool.feishuNotifyOnMerge": {
+          "type": "boolean",
+          "default": true,
+          "description": "合并 MR 成功后自动发送飞书通知（消息包含 MR 链接）。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license --no-rewrite-relative-links",
+    "publish:marketplace": "bash scripts/publish.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "~1.85.0",
+    "@vscode/vsce": "^4.0.0",
+    "typescript": "^5.9.3"
+  }
+}
